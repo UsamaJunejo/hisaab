@@ -162,11 +162,14 @@ export default async function AccountLedger({ params, searchParams }: { params: 
                   <td className="c">{statusCell(row)}</td>
                   <td className="c">
                     {acc.mine && (
-                      <form action={entryStatusAction} className="flex justify-center gap-1">
-                        <input type="hidden" name="id" value={row.id} /><input type="hidden" name="back" value={back} />
-                        <button name="status" value="3" className="btn btn-green h-8 min-h-0 px-2 text-[0.7rem]">Accept</button>
-                        <button name="status" value="2" className="btn btn-red h-8 min-h-0 px-2 text-[0.7rem]">Reject</button>
-                      </form>
+                      <div className="flex justify-center gap-1">
+                        {([["3", "Accept", "btn-green"], ["2", "Reject", "btn-red"]] as const).map(([st, label, cls]) => (
+                          <form key={st} action={entryStatusAction}>
+                            <input type="hidden" name="id" value={row.id} /><input type="hidden" name="back" value={back} /><input type="hidden" name="status" value={st} />
+                            <button className={`btn ${cls} h-8 min-h-0 px-2 text-[0.7rem]`}>{label}</button>
+                          </form>
+                        ))}
+                      </div>
                     )}
                   </td>
                   <td className="c">{fileCell(row)}</td>

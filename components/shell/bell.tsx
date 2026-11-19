@@ -33,7 +33,7 @@ export function Bell({ time24, dateFormat }: { time24: boolean; dateFormat: Date
   const when = (s: string) => `${fmtDate(s.slice(0, 10), dateFormat)} ${fmtTime(s, time24)}`;
   return (
     <div ref={ref} className="relative">
-      <button type="button" onClick={() => setOpen((o) => !o)} aria-label={`Notifications (${count})`} className="relative grid h-11 w-11 place-items-center rounded-xl bg-white/10 hover:bg-white/20">
+      <button type="button" onClick={() => { if (!open) setTimeout(() => fetch("/api/notifications", { method: "POST" }), 4000); setOpen((o) => !o); }} aria-label={`Notifications (${count})`} className="relative grid h-11 w-11 place-items-center rounded-xl bg-white/10 hover:bg-white/20">
         <BellIcon className="h-6 w-6" />
         {count > 0 && <span className="num absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-orange px-1 text-[0.7rem] font-bold">{count}</span>}
       </button>
@@ -63,18 +63,16 @@ export function Bell({ time24, dateFormat }: { time24: boolean; dateFormat: Date
                 )}
                 <p className="mt-1 text-xs text-muted">{when(n.created_at)}</p>
                 {n.kind === "transaction" && n.entry && (
-                  <form action={async (f) => { await approveEntry(f); load(); }} className="mt-3 flex justify-between">
-                    <input type="hidden" name="id" value={n.ref_id ?? ""} />
-                    <button name="status" value="3" className="btn btn-green">Accept</button>
-                    <button name="status" value="2" className="btn btn-red">Reject</button>
-                  </form>
+                  <div className="mt-3 flex justify-between">
+                    <Answer fields={{ id: n.ref_id ?? "", status: "3" }} label="Accept" cls="btn-green" done={load} />
+                    <Answer fields={{ id: n.ref_id ?? "", status: "2" }} label="Reject" cls="btn-red" done={load} />
+                  </div>
                 )}
                 {n.kind === "activity" && n.share?.status === "pending" && (
-                  <form action={async (f) => { await approveEntry(f); load(); }} className="mt-3 flex justify-between">
-                    <input type="hidden" name="share" value={n.share.id} />
-                    <button name="status" value="accept" className="btn btn-green">Accept sharing</button>
-                    <button name="status" value="decline" className="btn btn-red">Decline</button>
-                  </form>
+                  <div className="mt-3 flex justify-between">
+                    <Answer fields={{ share: n.share.id, status: "accept" }} label="Accept sharing" cls="btn-green" done={load} />
+                    <Answer fields={{ share: n.share.id, status: "decline" }} label="Decline" cls="btn-red" done={load} />
+                  </div>
                 )}
               </div>
             ))}
@@ -82,5 +80,15 @@ export function Bell({ time24, dateFormat }: { time24: boolean; dateFormat: Date
         </div>
       )}
     </div>
+  );
+}
+
+/** One button = one small form, so the right answer is always sent. */
+function Answer({ fields, label, cls, done }: { fields: Record<string, string | number>; label: string; cls: string; done: () => void }) {
+  return (
+    <form action={async (f) => { await approveEntry(f); done(); }}>
+      {Object.entries(fields).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
+      <button className={`btn ${cls}`}>{label}</button>
+    </form>
   );
 }
