@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+/*
+  Hisaab: MunshiBaba's layout, modern finish.
+  Navy top bar, light icon menu row, slate right rail, white tiles on a soft grey page,
+  orange accent for the active tab and payment voucher, green for save, red for reset/delete.
+*/
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-page: #eef1f6;
+  --color-card: #ffffff;
+  --color-line: #dde3ec;
+  --color-ink: #121a2b;
+  --color-muted: #5b6577;
+  --color-navy: #0f1b33;
+  --color-navy-2: #18284a;
+  --color-rail: #2d3546;
+  --color-rail-2: #3a4458;
+  --color-orange: #f7941d;
+  --color-orange-dark: #d97a08;
+  --color-blue: #0b5394;
+  --color-blue-soft: #e6effa;
+  --color-green: #138a3e;
+  --color-green-soft: #e3f4e8;
+  --color-red: #d62f2f;
+  --color-red-soft: #fbe6e6;
+  --color-grey-btn: #3f4652;
+}
+
+html { font-size: 15px; }
+body { background: var(--color-page); color: var(--color-ink); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+:focus-visible { outline: 2px solid var(--color-orange); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+
+@utility card { background: var(--color-card); border-radius: 14px; box-shadow: 0 1px 2px rgb(15 27 51 / 0.06), 0 4px 16px -8px rgb(15 27 51 / 0.12); }
+@utility btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; min-height: 2.6rem; padding: 0 1.25rem;
+  border-radius: 9px; font-weight: 600; font-size: 0.85rem; letter-spacing: 0.02em; text-transform: uppercase; color: white;
+  transition: filter 120ms, transform 120ms; cursor: pointer;
+  &:hover { filter: brightness(1.08); }
+  &:active { transform: translateY(1px); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+@utility btn-green { background: var(--color-green); }
+@utility btn-red { background: var(--color-red); }
+@utility btn-blue { background: var(--color-blue); }
+@utility btn-orange { background: var(--color-orange); }
+@utility btn-dark { background: var(--color-grey-btn); }
+@utility btn-ghost { background: white; color: var(--color-ink); border: 1px solid var(--color-line); }
+@utility input {
+  width: 100%; min-height: 2.6rem; padding: 0.45rem 0.8rem; border-radius: 9px; border: 1px solid var(--color-line); background: white;
+  font-size: 0.95rem;
+  &:focus { outline: none; border-color: var(--color-orange); box-shadow: 0 0 0 3px rgb(247 148 29 / 0.18); }
+  &[aria-invalid="true"] { border-color: var(--color-red); box-shadow: 0 0 0 3px rgb(214 47 47 / 0.14); }
+}
+/* MunshiBaba's labelled input row: grey label box on the left, field on the right. */
+@utility field { display: flex; align-items: stretch; border: 1px solid var(--color-line); border-radius: 10px; overflow: hidden; background: white; }
+@utility field-label { display: flex; align-items: center; min-width: 6.5rem; padding: 0 0.8rem; background: #e9edf3; color: #39424f; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+@utility field-input { flex: 1; min-width: 0; padding: 0.55rem 0.8rem; border: 0; outline: none; background: transparent; font-size: 0.95rem; }
+@utility page-title { font-size: 1.35rem; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; }
+@utility th-grey { background: #dfe3ea; color: #26303f; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+
+table.grid { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.88rem; }
+table.grid th { background: #dfe3ea; color: #26303f; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.65rem 0.6rem; text-align: left; white-space: nowrap; }
+table.grid th:first-child { border-top-left-radius: 8px; } table.grid th:last-child { border-top-right-radius: 8px; }
+table.grid td { padding: 0.6rem; border-bottom: 1px solid var(--color-line); vertical-align: middle; }
+table.grid td.r, table.grid th.r { text-align: right; }
+table.grid td.c, table.grid th.c { text-align: center; }
+table.grid tfoot td { background: #eef1f5; font-weight: 700; }
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; }
+}

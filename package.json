@@ -1,0 +1,31 @@
+{
+  "name": "hisaab",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "FX_TEST_RATES=USD:280,AED:76.2,GBP:355,EUR:300 node --test --experimental-strip-types --disable-warning=ExperimentalWarning --test-concurrency=1 tests/*.test.ts"
+  },
+  "engines": { "node": ">=22.13" },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.3.16",
+    "bcryptjs": "^3.0.3",
+    "jose": "^6.2.15",
+    "lucide-react": "^0.544.0",
+    "next": "^15.5.29",
+    "postgres": "^3.4.7",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3"
+  }
+}
