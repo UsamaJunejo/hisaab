@@ -11,7 +11,12 @@ export default async function Ceo() {
   const u = await requireUser();
   if (!u.is_admin) redirect("/dashboard");
   const d = await db();
-  const [s, pend] = await Promise.all([ceoStats(d), pendingFunds(d)]);
+  const [s, pend, msgs, issues] = await Promise.all([ceoStats(d), pendingFunds(d),
+    d.q<{ id: number; name: string; email: string; phone: string | null; company: string | null; message: string; at: string }>(
+      "SELECT id, first_name || COALESCE(' ' || last_name, '') AS name, email, phone, company, message, to_char(created_at, 'YYYY-MM-DD HH24:MI') AS at FROM contact_messages ORDER BY created_at DESC LIMIT 50"),
+    d.q<{ id: number; name: string; email: string; message: string; at: string }>(
+      "SELECT i.id, u.name, u.email, i.message, to_char(i.created_at, 'YYYY-MM-DD HH24:MI') AS at FROM issues i JOIN users u ON u.id = i.user_id ORDER BY i.created_at DESC LIMIT 50"),
+  ]);
   const tiles: [string, string | number][] = [
     ["Total Registered Users", s.registered], ["Total Active Users", s.active], ["Total In-Active Users Since 90 Days", s.inactive90], ["Total Invited Users", s.invited],
     ["Total Invitations Accepted Users", s.accepted], ["Total Invitations Pending Users", s.pending], ["Total Paid Amount", `${(s.paid_cents / 100).toFixed(2)} USD`],
@@ -36,6 +41,22 @@ export default async function Ceo() {
                   <form action={decideFundsAction}><input type="hidden" name="id" value={f.id} /><input type="hidden" name="ok" value="0" /><button className="btn btn-red h-8 min-h-0 px-2">Reject</button></form>
                 </div></td></tr>
             ))}
+          </tbody></table>
+      </div>
+      <div className="card mt-4 overflow-x-auto p-3">
+        <h2 className="mb-2 text-sm font-bold tracking-wide">CONTACT US MESSAGES ({msgs.length})</h2>
+        <table className="tbl"><thead><tr><th>Date</th><th>From</th><th>Company</th><th>Message</th></tr></thead>
+          <tbody>
+            {msgs.length === 0 && <tr><td colSpan={4} className="py-4 text-center text-muted">No messages yet.</td></tr>}
+            {msgs.map((m) => <tr key={m.id}><td className="num whitespace-nowrap">{m.at}</td><td>{m.name}<br /><a href={`mailto:${m.email}`} className="text-xs text-blue underline">{m.email}</a>{m.phone && <span className="text-xs text-muted"> · {m.phone}</span>}</td><td>{m.company}</td><td className="whitespace-pre-wrap">{m.message}</td></tr>)}
+          </tbody></table>
+      </div>
+      <div className="card mt-4 overflow-x-auto p-3">
+        <h2 className="mb-2 text-sm font-bold tracking-wide">ISSUES REPORTED ({issues.length})</h2>
+        <table className="tbl"><thead><tr><th>Date</th><th>User</th><th>Issue</th></tr></thead>
+          <tbody>
+            {issues.length === 0 && <tr><td colSpan={3} className="py-4 text-center text-muted">No issues reported.</td></tr>}
+            {issues.map((m) => <tr key={m.id}><td className="num whitespace-nowrap">{m.at}</td><td>{m.name}<br /><span className="text-xs text-muted">{m.email}</span></td><td className="whitespace-pre-wrap">{m.message}</td></tr>)}
           </tbody></table>
       </div>
     </Page>
