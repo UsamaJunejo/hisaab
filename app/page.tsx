@@ -15,7 +15,7 @@ export default async function Home() {
   const price = (cents: number, per: string) => (
     <>
       <span className="text-2xl font-bold">USD {(cents / 100).toFixed(2)}</span> <span className="text-sm text-muted">/ {per}</span>
-      {local && <span className="block text-sm font-semibold text-orange">about {local(cents)} / {per}</span>}
+      {local && cents > 0 && <span className="block text-sm font-semibold text-orange">about {local(cents)} / {per}</span>}
     </>
   );
   const icons = [Layers, ShieldCheck, Layers, Receipt, Wallet, FileText];

@@ -11,9 +11,9 @@ export function Page({ title, badge, level, rail, children }: { title: React.Rea
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b-2 border-line pb-2">
             <h1 className="page-title flex items-center gap-3">
               {title}
-              {badge !== undefined && <span className="num rounded-md bg-orange px-2 py-0.5 text-sm font-bold text-white">{badge}</span>}
+              {badge !== undefined && <span data-help="badge" className="num rounded-md bg-orange px-2 py-0.5 text-sm font-bold text-white">{badge}</span>}
             </h1>
-            <span className="rounded-md bg-white px-2.5 py-1 text-xs font-semibold tracking-wide shadow-sm">{SYSTEM[level]}</span>
+            <span data-help="system" className="rounded-md bg-white px-2.5 py-1 text-xs font-semibold tracking-wide shadow-sm">{SYSTEM[level]}</span>
           </div>
           {children}
           <footer className="no-print mt-10 flex items-center justify-center gap-3 border-t border-line pt-5 text-muted">

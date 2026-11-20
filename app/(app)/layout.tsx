@@ -20,8 +20,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </Link>
         <p className="hidden flex-1 text-center text-sm font-semibold tracking-[0.12em] md:block">PERSONAL ACCOUNTING SYSTEM</p>
         <span className="flex-1 md:hidden" />
-        <ProfileMenu name={u.name} customerNo={u.customer_no} photo={u.photo_v ? `/api/photo?v=${u.photo_v}` : null} isAdmin={u.is_admin} />
-        <Bell time24={u.time24} dateFormat={u.date_format} />
+        <div data-help="profile" className="flex items-center gap-2">
+          <ProfileMenu name={u.name} customerNo={u.customer_no} photo={u.photo_v ? `/api/photo?v=${u.photo_v}` : null} isAdmin={u.is_admin} />
+          <Bell time24={u.time24} dateFormat={u.date_format} />
+        </div>
       </header>
       <MenuRow time24={u.time24} locked={lock !== "ok"} />
       {children}

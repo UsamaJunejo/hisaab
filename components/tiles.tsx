@@ -24,8 +24,8 @@ export function Tile({ t, wide = false }: { t: TileData; wide?: boolean }) {
   );
 }
 
-export function TileGrid({ children, cols = 4 }: { children: React.ReactNode; cols?: 3 | 4 }) {
-  return <div className={`grid gap-3 sm:grid-cols-2 ${cols === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>{children}</div>;
+export function TileGrid({ children, cols = 4, help }: { children: React.ReactNode; cols?: 3 | 4; help?: string }) {
+  return <div data-help={help} className={`grid gap-3 sm:grid-cols-2 ${cols === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>{children}</div>;
 }
 
 export function AddTile({ label, spec }: { label: string; spec: NodeSpec }) {

@@ -32,7 +32,7 @@ export function Rail({ spec }: { spec: RailSpec }) {
   }, []);
   const btn = "grid h-12 w-12 place-items-center rounded-xl text-white/85 hover:bg-rail-2 hover:text-white";
   return (
-    <aside className="no-print relative w-16 shrink-0 bg-rail">
+    <aside data-help="rail" className="no-print relative w-16 shrink-0 bg-rail">
       <div className="sticky top-[4.6rem] flex flex-col items-center gap-2 py-4">
         {spec.level && <span className="text-[0.62rem] font-bold tracking-wide text-orange">{spec.level}</span>}
         <button type="button" onClick={() => router.back()} aria-label="Back" title="Back" className={btn}><ArrowLeft className="h-6 w-6 rounded-full border-2 border-orange p-0.5 text-orange" /></button>

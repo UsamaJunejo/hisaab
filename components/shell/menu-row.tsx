@@ -67,7 +67,7 @@ export function MenuRow({ time24, locked }: { time24: boolean; locked: boolean }
   ];
   const showPay = () => window.dispatchEvent(new CustomEvent("hs-paywall"));
   return (
-    <nav aria-label="Main" className="no-print sticky top-0 z-30 flex h-[4.6rem] items-stretch overflow-x-auto border-b border-line bg-[#e7ebf1] pl-3">
+    <nav aria-label="Main" data-help="menu" className="no-print sticky top-0 z-30 flex h-[4.6rem] items-stretch overflow-x-auto border-b border-line bg-[#e7ebf1] pl-3">
       <Clock time24={time24} />
       {items.map((it) => {
         const active = it.match.some((m) => path.startsWith(m));

@@ -43,7 +43,7 @@ const LEVELS = [
   ["3", "3 LEVEL SYSTEM", "Category, then sub-category, then account. The most organised way of keeping books."],
 ] as const;
 
-export function SignupForm({ refCode }: { refCode?: string }) {
+export function SignupForm({ refCode, local }: { refCode?: string; local?: Record<string, string> }) {
   const [s, act, pending] = useActionState<FormState, FormData>(signup, {});
   const [country, setCountry] = useState(s.v?.country || "PK");
   const code = COUNTRIES.find((c) => c[0] === country)?.[2] ?? "";
@@ -70,6 +70,7 @@ export function SignupForm({ refCode }: { refCode?: string }) {
             <input type="radio" name="plan" value={v} defaultChecked={s.v?.plan ? s.v.plan === v : i === 0} className="sr-only" />
             <span className="block text-xs font-bold tracking-wide text-muted">{t}</span>
             <span className="block text-lg font-bold">{p}</span>
+            {local?.[v] && <span className="block text-xs font-semibold text-orange">about {local[v]}</span>}
             <span className="block text-xs text-muted">{d}</span>
           </label>
         ))}
