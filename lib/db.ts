@@ -248,6 +248,60 @@ export const MIGRATIONS: string[] = [
      first_name TEXT NOT NULL, last_name TEXT, phone TEXT, email TEXT NOT NULL, company TEXT, message TEXT NOT NULL,
      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
    );`,
+  // 3: Business Module (shop / restaurant): products, vendors, customers, purchases, sales, payments, stock
+  `CREATE TABLE IF NOT EXISTS businesses (
+     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+     owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     name TEXT NOT NULL, address TEXT, phone TEXT, email TEXT, fax TEXT, tax_no TEXT, website TEXT, country TEXT,
+     customers_sub_id INTEGER, vendors_sub_id INTEGER, walkin_account_id INTEGER, sales_account_id INTEGER, purchases_account_id INTEGER,
+     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+   );
+   CREATE TABLE IF NOT EXISTS biz_warehouses (
+     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+     name TEXT NOT NULL, address TEXT, city TEXT, state TEXT, zip TEXT, country TEXT, contact TEXT, email TEXT, phone TEXT, fax TEXT
+   );
+   CREATE TABLE IF NOT EXISTS biz_taxes (
+     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+     name TEXT NOT NULL, kind TEXT NOT NULL CHECK (kind IN ('percent', 'amount')), rate NUMERIC(14, 3) NOT NULL, active BOOLEAN NOT NULL DEFAULT true
+   );
+   CREATE TABLE IF NOT EXISTS biz_discounts (
+     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+     name TEXT NOT NULL, kind TEXT NOT NULL CHECK (kind IN ('percent', 'amount')), rate NUMERIC(14, 3) NOT NULL
+   );
+   CREATE TABLE IF NOT EXISTS biz_categories (
+     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+     name TEXT NOT NULL, parent_id INTEGER REFERENCES biz_categories(id) ON DELETE CASCADE
+   );
+   CREATE TABLE IF NOT EXISTS biz_products (
+     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+     category_id INTEGER REFERENCES biz_categories(id) ON DELETE SET NULL, name TEXT NOT NULL, type TEXT NOT NULL DEFAULT 'Stock',
+     barcode TEXT, sale_price BIGINT NOT NULL DEFAULT 0, purchase_price BIGINT NOT NULL DEFAULT 0, tax_id INTEGER REFERENCES biz_taxes(id) ON DELETE SET NULL,
+     size TEXT, color TEXT, location TEXT, low_stock NUMERIC(14, 3) NOT NULL DEFAULT 0
+   );
+   CREATE TABLE IF NOT EXISTS biz_parties (
+     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+     kind TEXT NOT NULL CHECK (kind IN ('customer', 'vendor')), name TEXT NOT NULL, company TEXT, contact TEXT, email TEXT, address TEXT,
+     city TEXT, state TEXT, country TEXT, tax_no TEXT, st_no TEXT, terms TEXT, account_id INTEGER NOT NULL REFERENCES accounts(id)
+   );
+   CREATE TABLE IF NOT EXISTS biz_docs (
+     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+     kind TEXT NOT NULL CHECK (kind IN ('purchase', 'sale', 'expense')), number TEXT NOT NULL, party_id INTEGER REFERENCES biz_parties(id),
+     warehouse_id INTEGER REFERENCES biz_warehouses(id) ON DELETE SET NULL, expense_account_id INTEGER REFERENCES accounts(id),
+     date DATE NOT NULL, subtotal BIGINT NOT NULL, discount BIGINT NOT NULL DEFAULT 0, tax BIGINT NOT NULL DEFAULT 0, total BIGINT NOT NULL,
+     note TEXT, entry_id INTEGER REFERENCES entries(id), created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+   );
+   CREATE TABLE IF NOT EXISTS biz_doc_lines (
+     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, doc_id INTEGER NOT NULL REFERENCES biz_docs(id) ON DELETE CASCADE,
+     product_id INTEGER NOT NULL REFERENCES biz_products(id), qty NUMERIC(14, 3) NOT NULL CHECK (qty > 0), price BIGINT NOT NULL, total BIGINT NOT NULL
+   );
+   CREATE TABLE IF NOT EXISTS biz_payments (
+     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, business_id INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+     kind TEXT NOT NULL CHECK (kind IN ('vendor', 'customer')), party_id INTEGER NOT NULL REFERENCES biz_parties(id), doc_id INTEGER REFERENCES biz_docs(id) ON DELETE SET NULL,
+     date DATE NOT NULL, amount BIGINT NOT NULL CHECK (amount > 0), account_id INTEGER NOT NULL REFERENCES accounts(id), note TEXT,
+     entry_id INTEGER REFERENCES entries(id), created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+   );
+   CREATE INDEX IF NOT EXISTS biz_docs_business ON biz_docs (business_id, kind, date);
+   CREATE INDEX IF NOT EXISTS biz_lines_product ON biz_doc_lines (product_id);`,
 ];
 export const LATEST_VERSION = MIGRATIONS.length + 1;
 
