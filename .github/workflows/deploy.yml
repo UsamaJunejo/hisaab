@@ -1,6 +1,6 @@
 # Deploys Hisaab to Vercel on every push to main (and on demand from the Actions tab).
 # It uses a Vercel token instead of Vercel's GitHub app.
-# Needs three repository secrets (Settings > Secrets and variables > Actions):
+# Skips quietly unless these three repository secrets exist (Settings > Secrets and variables > Actions):
 #   VERCEL_TOKEN    - from vercel.com/account/tokens
 #   DATABASE_URL    - the Supabase pooler address (port 6543)
 #   SESSION_SECRET  - any long random text, 32+ characters
@@ -26,6 +26,7 @@ jobs:
           node-version: 22
 
       - name: Check secrets
+        id: check
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -36,11 +37,14 @@ jobs:
           [ -z "$DATABASE_URL" ] && missing="$missing DATABASE_URL"
           [ -z "$SESSION_SECRET" ] && missing="$missing SESSION_SECRET"
           if [ -n "$missing" ]; then
-            echo "::error::Missing repository secrets:$missing (add them in Settings > Secrets and variables > Actions)"
-            exit 1
+            echo "::notice::Skipping deploy, missing repository secrets:$missing"
+            echo "ready=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=yes" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Deploy
+        if: steps.check.outputs.ready == 'yes'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
