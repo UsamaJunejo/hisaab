@@ -3,6 +3,7 @@ import type { Db } from "./db.ts";
 import { seedDefaults } from "./books.ts";
 import { DATE_FORMATS, type DateFormat } from "./format.ts";
 import { isCurrency } from "./currencies.ts";
+import { PLANS, isGroupPlan } from "./billing.ts";
 
 // ---------------------------------------------------------------- settings
 
@@ -119,6 +120,15 @@ export async function invitationStats(d: Db, userId: number) {
 
 export async function addLicense(d: Db, ownerId: number, l: { name: string; email: string; phone: string }) {
   if (!l.name.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(l.email.trim())) throw new Error("Please enter the name and a valid email");
+  const [o] = await d.q<{ plan: string; email: string }>("SELECT plan, email FROM users WHERE id = $1", [ownerId]);
+  const seats = isGroupPlan(o.plan) ? PLANS[o.plan as "group_monthly" | "group_yearly"].seats : 0;
+  if (!seats) throw new Error("Group License needs a Group package. Buy Group Per Month or Group Per Year in My Account → Invoices.");
+  const [{ n }] = await d.q<{ n: number }>("SELECT COUNT(*)::int AS n FROM group_licenses WHERE owner_id = $1", [ownerId]);
+  if (n >= seats) throw new Error(`Limit Exceeded. You can add only ${seats} persons in your group license`);
+  const email = l.email.trim().toLowerCase();
+  if (email === o.email) throw new Error("You are already covered as the payer of this group.");
+  const [dup] = await d.q("SELECT 1 FROM group_licenses WHERE owner_id = $1 AND email = $2", [ownerId, email]);
+  if (dup) throw new Error("This email is already in your group license");
   await d.q("INSERT INTO group_licenses (owner_id, name, email, phone) VALUES ($1, $2, $3, $4)", [ownerId, l.name.trim(), l.email.trim().toLowerCase(), l.phone.trim() || null]);
 }
 export async function licenses(d: Db, ownerId: number) {

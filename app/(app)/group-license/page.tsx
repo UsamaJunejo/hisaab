@@ -2,6 +2,7 @@ import { Trash2, Send } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { licenses } from "@/lib/account";
+import { PLANS, isGroupPlan } from "@/lib/billing";
 import { Page } from "@/components/page";
 import { ConfirmForm } from "@/components/confirm-form";
 import { addLicenseAction, deleteLicenseAction } from "@/app/actions/settings";
@@ -14,7 +15,8 @@ export default async function GroupLicense() {
   const stat = (label: string, n: number) => <div className="card p-4 text-center"><p className="text-sm text-muted">{label}</p><p className="num text-2xl font-semibold">{n}</p></div>;
   return (
     <Page title="Group License" level={u.level} rail={{}}>
-      <div className="mb-4 grid gap-3 sm:grid-cols-3">{stat("Total License", list.length)}{stat("Invitation Sent", list.length)}{stat("License Used", list.filter((l) => l.used).length)}</div>
+      {!isGroupPlan(u.plan) && <p className="card mb-4 border-l-4 border-orange p-4 text-sm">Group License comes with a Group package (USD 3 a month or USD 30 a year, for you plus {PLANS.group_monthly.seats} people). Buy one in <a href="/portal/invoices?plan=group_monthly" className="font-semibold text-blue underline">My Account → Invoices</a>.</p>}
+      <div className="mb-4 grid gap-3 sm:grid-cols-3">{stat("Total License", isGroupPlan(u.plan) ? PLANS[u.plan as "group_monthly"].seats : 0)}{stat("Invitation Sent", list.length)}{stat("License Used", list.filter((l) => l.used).length)}</div>
       <form action={addLicenseAction} className="card mb-4 grid gap-3 p-4 sm:grid-cols-3">
         <h2 className="text-sm font-bold tracking-wide sm:col-span-3">NEW INVITATION</h2>
         <input name="name" required placeholder="Enter Name" className="input" />

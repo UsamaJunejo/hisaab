@@ -1,5 +1,5 @@
 import type { Db } from "./db.ts";
-import { numberInvoice } from "./billing.ts";
+import { numberInvoice, planInfo, type PlanKey } from "./billing.ts";
 import { addDays, today } from "./format.ts";
 
 // ======================================================================================
@@ -58,7 +58,7 @@ export async function seedDefaults(d: Db, userId: number) {
   }
 }
 
-export type NewUser = { name: string; email: string; phone?: string | null; country?: string; passwordHash: string; plan?: "free" | "monthly" | "yearly"; referredBy?: number | null; level?: 1 | 2 | 3 };
+export type NewUser = { name: string; email: string; phone?: string | null; country?: string; passwordHash: string; plan?: PlanKey; referredBy?: number | null; level?: 1 | 2 | 3 };
 
 export async function createUser(d: Db, u: NewUser): Promise<number> {
   const name = u.name.trim();
@@ -75,13 +75,13 @@ export async function createUser(d: Db, u: NewUser): Promise<number> {
       `INSERT INTO users (customer_no, name, email, phone, country, password_hash, is_admin, plan, plan_until, data_mb, referred_by, level)
        VALUES (lpad((floor(random() * 9000000) + 1000000)::text, 7, '0'), $1, $2, $3, $4, $5, NOT EXISTS (SELECT 1 FROM users), $6,
                CURRENT_DATE + $7::int, $8, $9, $10) RETURNING id`,
-      [name, email, phone || null, u.country || "PK", u.passwordHash, plan, plan === "free" ? 14 : plan === "monthly" ? 30 : 365, plan === "free" ? 25 : 100, u.referredBy ?? null, u.level ?? 3],
+      [name, email, phone || null, u.country || "PK", u.passwordHash, plan, planInfo(plan).days, planInfo(plan).mb, u.referredBy ?? null, u.level ?? 3],
     );
     await seedDefaults(t, row.id);
     const [inv] = await t.q<IdRow>(
       `INSERT INTO invoices (user_id, number, package, amount_cents, due_at, status)
        VALUES ($1::int, 'new-' || gen_random_uuid(), $2, $3, now() + ($4::int * interval '1 day'), $5) RETURNING id`,
-      [row.id, plan === "free" ? "14 Days Free" : plan === "monthly" ? "Single Per Month" : "Single Per Year", plan === "free" ? 0 : plan === "monthly" ? 100 : 1000, plan === "free" ? 14 : 0, plan === "free" ? "FREE" : "UnPaid"],
+      [row.id, planInfo(plan).name, planInfo(plan).cents, plan === "free" ? 14 : 0, plan === "free" ? "FREE" : "UnPaid"],
     );
     await numberInvoice(t, inv.id);
     return row.id;

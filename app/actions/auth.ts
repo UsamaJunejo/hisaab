@@ -1,6 +1,7 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { PLAN_KEYS, type PlanKey } from "@/lib/billing";
 import { randomBytes } from "node:crypto";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
@@ -18,13 +19,13 @@ export async function signup(_: FormState, f: FormData): Promise<FormState> {
 async function signupInner(f: FormData): Promise<FormState> {
   const name = s(f, "name"), email = s(f, "email"), phone = s(f, "phone"), country = s(f, "country") || "PK";
   const p1 = String(f.get("password") ?? ""), p2 = String(f.get("password2") ?? "");
-  const plan = s(f, "plan") as "free" | "monthly" | "yearly";
+  const plan = s(f, "plan") as PlanKey;
   if (!name) return { error: "Please Enter Full Name" };
   if (!email) return { error: "Please Enter Valid Email" };
   if (!phone) return { error: "Please Enter Cell Number" };
   if (p1.length < 6) return { error: "Please Enter Password Comprising Of At Least 6 (Six) Characters." };
   if (p1 !== p2) return { error: "Passwords do not match." };
-  if (!["free", "monthly", "yearly"].includes(plan)) return { error: "Please Select Your Package." };
+  if (!PLAN_KEYS.includes(plan)) return { error: "Please Select Your Package." };
   const level = Number(s(f, "level"));
   if (![1, 2, 3].includes(level)) return { error: "Please choose your accounting system (1, 2 or 3 level)." };
   if (f.get("accept") !== "on") return { error: "Please accept the Terms of Use." };

@@ -37,3 +37,25 @@ test("funds, paying an invoice extends the plan, 20% referral, reset, level swit
   await A.setMpin(d, u, "1234", "1234");
   await assert.rejects(() => A.checkMpin(d, u, "9999"), /Not Matched/);
 });
+
+test("group package: 5 licenses, members covered while the payer's group plan is active", async () => {
+  const { openPglite } = await import("../lib/db.ts");
+  const B = await import("../lib/books.ts");
+  const Bl = await import("../lib/billing.ts");
+  const A = await import("../lib/account.ts");
+  const P = await import("../lib/plan.ts");
+  const d = await openPglite();
+  const owner = await B.createUser(d, { name: "Owner", email: `o${Math.random()}@x.pk`, passwordHash: "x" });
+  await assert.rejects(() => A.addLicense(d, owner, { name: "M", email: "m@x.pk", phone: "" }), /Group package/);
+  await d.q("INSERT INTO funds (user_id, kind, amount_cents, status) VALUES ($1, 'add', 3000, 'Completed')", [owner]);
+  await Bl.payInvoice(d, owner, await Bl.invoiceFor(d, owner, "group_monthly"));
+  const memberEmail = `m${Math.random()}@x.pk`;
+  for (let i = 0; i < 5; i++) await A.addLicense(d, owner, { name: `M${i}`, email: i === 0 ? memberEmail : `m${i}${Math.random()}@x.pk`, phone: "" });
+  await assert.rejects(() => A.addLicense(d, owner, { name: "M6", email: "six@x.pk", phone: "" }), /Limit Exceeded/);
+  const member = await B.createUser(d, { name: "Mem", email: memberEmail, passwordHash: "x" });
+  await d.q("UPDATE users SET plan_until = CURRENT_DATE - 1 WHERE id = $1", [member]);
+  const [m] = await d.q<{ id: number; email: string; plan_until: string; data_mb: number; is_admin: boolean }>("SELECT id, email, to_char(plan_until, 'YYYY-MM-DD') AS plan_until, data_mb, false AS is_admin FROM users WHERE id = $1", [member]);
+  assert.equal(await P.lockState(d, m), "ok", "covered by the group");
+  await d.q("UPDATE users SET plan_until = CURRENT_DATE - 1 WHERE id = $1", [owner]);
+  assert.equal(await P.lockState(d, m), "date", "group expired: locked again");
+});

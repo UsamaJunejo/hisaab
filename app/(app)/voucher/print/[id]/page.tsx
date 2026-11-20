@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { planInfo } from "@/lib/billing";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getEntry } from "@/lib/books";
@@ -12,7 +13,7 @@ export default async function PrintVoucher({ params }: { params: Promise<{ id: s
   const e = await getEntry(d, u.id, Number((await params).id));
   if (!e) notFound();
   const files = await d.q<{ id: number; name: string; mime: string }>("SELECT id, name, mime FROM attachments WHERE entry_id = $1 ORDER BY id", [e.id]);
-  const plan = { free: "14 Days Free", monthly: "Single Per Month", yearly: "Single Per Year" }[u.plan];
+  const plan = planInfo(u.plan).name;
   return (
     <div className="fixed inset-0 z-[80] overflow-auto bg-white p-8">
       <PrintNow />

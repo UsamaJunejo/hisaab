@@ -33,8 +33,9 @@ export default async function Invoices({ searchParams }: { searchParams: Promise
       </div>
       <form action={newInvoiceAction} className="card mb-4 flex flex-wrap items-center gap-3 p-4">
         <p className="flex-1 text-sm font-semibold">Renew or upgrade your plan:</p>
-        <label className="flex items-center gap-2 text-sm"><input type="radio" name="plan" value="monthly" defaultChecked={want !== "yearly"} /> Single User Per Month · US $ 1</label>
-        <label className="flex items-center gap-2 text-sm"><input type="radio" name="plan" value="yearly" defaultChecked={want === "yearly"} /> Single User Per Year · US $ 10</label>
+        {([["monthly", "Single User Per Month · US $ 1"], ["yearly", "Single User Per Year · US $ 10"], ["group_monthly", "Group Per Month · US $ 3"], ["group_yearly", "Group Per Year · US $ 30"]] as const).map(([v, l]) => (
+          <label key={v} className="flex items-center gap-2 text-sm"><input type="radio" name="plan" value={v} defaultChecked={(want ?? "monthly") === v} /> {l}</label>
+        ))}
         <button className="btn btn-orange">Pay Now</button>
       </form>
       <div className="card overflow-x-auto p-3">

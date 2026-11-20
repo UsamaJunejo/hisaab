@@ -92,7 +92,8 @@ export async function transferFundsAction(f: FormData) {
   }, "Funds transferred.");
 }
 export async function newInvoiceAction(f: FormData) {
-  const plan = str(f, "plan") === "yearly" ? "yearly" : "monthly";
+  const want = str(f, "plan");
+  const plan = (["monthly", "yearly", "group_monthly", "group_yearly"] as const).find((k) => k === want) ?? "monthly";
   await act("/portal/invoices", (u, d) => Bl.invoiceFor(d, u.id, plan), "Invoice created. Pay it from your Funds.");
 }
 export async function payInvoiceAction(f: FormData) {

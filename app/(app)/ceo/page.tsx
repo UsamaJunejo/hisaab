@@ -17,7 +17,7 @@ export default async function Ceo() {
     ["Total Invitations Accepted Users", s.accepted], ["Total Invitations Pending Users", s.pending], ["Total Paid Amount", `${(s.paid_cents / 100).toFixed(2)} USD`],
     ["Total Active Transactions", s.entries], ["Total Active Transactions (Payment)", s.payments], ["Total Active Transactions (Receipt)", s.receipts],
     ["Total Attachments", s.attachments], ["Total Attachments in MB", (s.attachment_bytes / 1048576).toFixed(2)], ["(14 Days Free) Subscription Users", s.free],
-    ["(Monthly) Subscription Users", s.monthly], ["(Yearly) Subscription Users", s.yearly], ["Issues Reported", s.issues],
+    ["(Monthly) Subscription Users", s.monthly], ["(Yearly) Subscription Users", s.yearly], ["(Group) Subscription Users", s.group], ["Issues Reported", s.issues],
   ];
   return (
     <Page title="CEO Dashboard" level={u.level} rail={{}}>

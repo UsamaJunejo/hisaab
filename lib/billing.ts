@@ -4,7 +4,19 @@ import type { Db } from "./db.ts";
 // There is no card gateway here: money comes in as "Funds" (a request an admin confirms, e.g. after a
 // JazzCash or bank transfer), and invoices are paid from Funds.
 
-export const PLANS = { monthly: { name: "Single Per Month", cents: 100, days: 30, mb: 100 }, yearly: { name: "Single Per Year", cents: 1000, days: 365, mb: 100 } } as const;
+export const PLANS = {
+  monthly: { name: "Single Per Month", cents: 100, days: 30, mb: 100, seats: 0 },
+  yearly: { name: "Single Per Year", cents: 1000, days: 365, mb: 100, seats: 0 },
+  // Group packages (MunshiBaba: "USD 3 / month, USD 30 / year"): the payer plus GROUP_SEATS people listed in Group License.
+  group_monthly: { name: "Group Per Month", cents: 300, days: 30, mb: 100, seats: 5 },
+  group_yearly: { name: "Group Per Year", cents: 3000, days: 365, mb: 100, seats: 5 },
+} as const;
+export type PaidPlan = keyof typeof PLANS;
+export type PlanKey = "free" | PaidPlan;
+export const PLAN_KEYS: PlanKey[] = ["free", "monthly", "yearly", "group_monthly", "group_yearly"];
+export const isGroupPlan = (p: string) => p === "group_monthly" || p === "group_yearly";
+/** Plan details for sign-up (free = 14 days, 25 MB). */
+export const planInfo = (p: PlanKey) => p === "free" ? { name: "14 Days Free", cents: 0, days: 14, mb: 25, seats: 0 } : PLANS[p];
 export const METHODS = ["JazzCash", "Easypaisa", "Bank Transfer", "Credit / Debit Card"];
 
 export type Invoice = { id: number; number: string; package: string; amount_cents: number; created_at: string; due_at: string; status: string; paid_at: string | null };
@@ -79,12 +91,13 @@ export async function payInvoice(d: Db, userId: number, invoiceId: number) {
     const [inv] = await t.q<Invoice>("SELECT * FROM invoices WHERE id = $1 AND user_id = $2 AND status = 'UnPaid' FOR UPDATE", [invoiceId, userId]);
     if (!inv) throw new Error("Invoice not found or already paid");
     if ((await fundsBalance(t, userId)) < inv.amount_cents) throw new Error("Not enough funds. Please add funds first.");
-    const plan = Object.values(PLANS).find((p) => p.name === inv.package) ?? PLANS.monthly;
+    const key = (Object.keys(PLANS) as PaidPlan[]).find((k) => PLANS[k].name === inv.package) ?? "monthly";
+    const plan = PLANS[key];
     await t.q("INSERT INTO funds (user_id, kind, amount_cents, remarks, payment_to, status) VALUES ($1, 'invoice', $2, $3, 'Hisaab', 'Completed')", [userId, inv.amount_cents, `Invoice ${inv.number}`]);
     await t.q("UPDATE invoices SET status = 'Paid', paid_at = now() WHERE id = $1", [invoiceId]);
     await t.q(
       `UPDATE users SET plan = $1, data_mb = GREATEST(data_mb, $2), plan_until = GREATEST(plan_until, CURRENT_DATE) + $3::int WHERE id = $4`,
-      [plan.days >= 365 ? "yearly" : "monthly", plan.mb, plan.days, userId],
+      [key, plan.mb, plan.days, userId],
     );
     const [u] = await t.q<{ referred_by: number | null }>("SELECT referred_by FROM users WHERE id = $1", [userId]);
     if (u.referred_by) {
@@ -112,6 +125,7 @@ export async function ceoStats(d: Db) {
             (SELECT COUNT(*) FROM users WHERE plan = 'free')::int AS free,
             (SELECT COUNT(*) FROM users WHERE plan = 'monthly')::int AS monthly,
             (SELECT COUNT(*) FROM users WHERE plan = 'yearly')::int AS yearly,
+            (SELECT COUNT(*) FROM users WHERE plan IN ('group_monthly', 'group_yearly'))::int AS "group",
             (SELECT COUNT(*) FROM funds WHERE status = 'Pending')::int AS pending_funds,
             (SELECT COUNT(*) FROM issues)::int AS issues`,
   );

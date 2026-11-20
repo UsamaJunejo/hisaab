@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeftRight, CalendarDays, ChevronRight, Coins, Download, Gauge, Languages, PieChart, RotateCcw, Share2, UsersRound, FolderKanban } from "lucide-react";
+import { isGroupPlan } from "@/lib/billing";
+import { ArrowLeftRight, CalendarDays, ChevronRight, Coins, Download, Gauge, Languages, PieChart, RotateCcw, Share2, Users, UsersRound, FolderKanban } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { Page } from "@/components/page";
 import { COUNTRIES } from "@/lib/countries";
@@ -72,7 +73,8 @@ export default async function Settings() {
               <button className="btn btn-blue"><Download className="h-4 w-4" />Download Data</button>
             </form>
           </Row>
-          {/* GROUP LICENSE: MunshiBaba shows it only on its group packages, which Hisaab does not sell. */}
+          {/* GROUP LICENSE: shown only on the group packages, as in MunshiBaba */}
+          {isGroupPlan(u.plan) && <Row icon={<Users className="h-5 w-5 text-blue" />} title="Group License" href="/group-license" />}
 
           <Row icon={<RotateCcw className="h-5 w-5 text-red" />} title="Reset Account">
             <form action={resetAccountAction} className="space-y-3">

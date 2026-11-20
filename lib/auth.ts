@@ -29,7 +29,7 @@ export type User = {
   id: number; customer_no: string; name: string; email: string; phone: string | null; country: string; dob: string | null;
   is_admin: boolean; level: 1 | 2 | 3; currency: string; date_format: DateFormat; time24: boolean;
   show_name: boolean; show_email: boolean; show_phone: boolean; has_mpin: boolean; photo_v: string | null;
-  plan: "free" | "monthly" | "yearly"; plan_until: string; data_mb: number;
+  plan: import("./billing.ts").PlanKey; plan_until: string; data_mb: number;
   nok_name: string | null; nok_email: string | null; nok_phone: string | null; nok_after_days: number | null; nok_interval_days: number | null; nok_times: number | null;
 };
 

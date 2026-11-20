@@ -32,6 +32,8 @@ const PLANS = [
   ["free", "FREE", "USD 0.00", "Free for 14 days, with 25 MB data"],
   ["monthly", "PERSONAL", "USD 1 / MONTH", "Single user, 100 MB data / month"],
   ["yearly", "PERSONAL YEARLY", "USD 10 / YEAR", "Save 16%: single user, 100 MB data"],
+  ["group_monthly", "GROUP", "USD 3 / MONTH", "You plus 5 people, 100 MB data each"],
+  ["group_yearly", "GROUP YEARLY", "USD 30 / YEAR", "Save 16%: you plus 5 people"],
 ] as const;
 
 // "Choose Accounting System" (MunshiBaba asks this when you register; it can be changed later in Settings)
@@ -61,7 +63,7 @@ export function SignupForm({ refCode }: { refCode?: string }) {
         <input name="password" type="password" required minLength={6} autoComplete="new-password" placeholder="Password" className="input" />
         <input name="password2" type="password" required autoComplete="new-password" placeholder="Confirm Password" className="input" />
       </div>
-      <fieldset className="grid gap-2 sm:grid-cols-3">
+      <fieldset className="grid gap-2 sm:grid-cols-2">
         <legend className="mb-1 text-sm font-semibold">Select your package</legend>
         {PLANS.map(([v, t, p, d], i) => (
           <label key={v} className="cursor-pointer rounded-xl border-2 border-line p-3 has-[:checked]:border-orange has-[:checked]:bg-orange/5">

@@ -239,7 +239,16 @@ CREATE TABLE IF NOT EXISTS password_resets (
 `;
 
 /** Changes after the first release go here, in order. Never edit an old one. */
-export const MIGRATIONS: string[] = [];
+export const MIGRATIONS: string[] = [
+  // 2: group packages, contact-us messages
+  `ALTER TABLE users DROP CONSTRAINT IF EXISTS users_plan_check;
+   ALTER TABLE users ADD CONSTRAINT users_plan_check CHECK (plan IN ('free', 'monthly', 'yearly', 'group_monthly', 'group_yearly'));
+   CREATE TABLE IF NOT EXISTS contact_messages (
+     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+     first_name TEXT NOT NULL, last_name TEXT, phone TEXT, email TEXT NOT NULL, company TEXT, message TEXT NOT NULL,
+     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+   );`,
+];
 export const LATEST_VERSION = MIGRATIONS.length + 1;
 
 async function migrate(d: Db) {
