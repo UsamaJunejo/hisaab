@@ -1,0 +1,51 @@
+# Deploys Hisaab to Vercel on every push to main (and on demand from the Actions tab).
+# It uses a Vercel token instead of Vercel's GitHub app.
+# Needs three repository secrets (Settings > Secrets and variables > Actions):
+#   VERCEL_TOKEN    - from vercel.com/account/tokens
+#   DATABASE_URL    - the Supabase pooler address (port 6543)
+#   SESSION_SECRET  - any long random text, 32+ characters
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check secrets
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+        run: |
+          missing=""
+          [ -z "$VERCEL_TOKEN" ] && missing="$missing VERCEL_TOKEN"
+          [ -z "$DATABASE_URL" ] && missing="$missing DATABASE_URL"
+          [ -z "$SESSION_SECRET" ] && missing="$missing SESSION_SECRET"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing (add them in Settings > Secrets and variables > Actions)"
+            exit 1
+          fi
+
+      - name: Deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+        run: |
+          npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN" \
+            --env DATABASE_URL="$DATABASE_URL" --env SESSION_SECRET="$SESSION_SECRET" \
+            --build-env DATABASE_URL="$DATABASE_URL" --build-env SESSION_SECRET="$SESSION_SECRET"
