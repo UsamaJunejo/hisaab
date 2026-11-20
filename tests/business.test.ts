@@ -19,7 +19,7 @@ test("business module: purchase, sale, payments, stock, balances, aging, profit,
   await Z.saveParty(d, me, biz, "vendor", 0, { name: "Wholesale Co", terms: "CREDIT" });
   await Z.saveParty(d, me, biz, "customer", 0, { name: "Bilal" });
   const [vendor] = await Z.parties(d, me, biz, "vendor");
-  const [cust] = await Z.parties(d, me, biz, "customer");
+  const cust = (await Z.parties(d, me, biz, "customer")).find((p) => p.name === "BILAL")!;
 
   // buy 10 at 250, pay 1,000 now
   await Z.createDoc(d, me, biz, { kind: "purchase", partyId: vendor.id, warehouseId: null, date: "2026-09-01", lines: [{ productId: rice.id, qty: 10, price: 250_00 }], paidNow: 1000_00, payAccountId: cash });
@@ -28,8 +28,10 @@ test("business module: purchase, sale, payments, stock, balances, aging, profit,
   const [sale] = await Z.docs(d, me, biz, "sale");
   assert.deepEqual([sale.subtotal, sale.discount, sale.tax, sale.total, sale.paid], [1200_00, 50_00, 115_00, 1265_00, 500_00]);
   assert.equal(sale.number, "S-000001");
-  // walk-in cash sale of 1 (no customer)
-  await Z.createDoc(d, me, biz, { kind: "sale", partyId: null, warehouseId: null, date: "2026-11-11", lines: [{ productId: rice.id, qty: 1, price: 300_00 }] });
+  // walk-in cash sale of 1 (no customer), paid in full
+  await Z.createDoc(d, me, biz, { kind: "sale", partyId: null, warehouseId: null, date: "2026-11-11", lines: [{ productId: rice.id, qty: 1, price: 300_00 }], paidNow: 300_00, payAccountId: cash });
+  const walk = (await Z.docs(d, me, biz, "sale")).find((x) => x.party === "WALK IN CUSTOMER")!;
+  assert.equal(walk.paid, 300_00);
   // expense voucher paid straight from cash
   const elec = (await Z.expenseAccounts(d, me)).find((a) => a.name === "ELECTRICITY")!.id;
   await Z.createDoc(d, me, biz, { kind: "expense", partyId: null, warehouseId: null, date: "2026-11-12", lines: [], amount: 800_00, expenseAccountId: elec, payAccountId: cash });
@@ -39,7 +41,7 @@ test("business module: purchase, sale, payments, stock, balances, aging, profit,
   assert.equal(st.value, 1250_00);
   assert.equal(st.low, true, "5 left is at the low-stock level");
 
-  const cb = (await Z.partyBalances(d, me, biz, "customer"))[0];
+  const cb = (await Z.partyBalances(d, me, biz, "customer")).find((p) => p.name === "BILAL")!;
   assert.equal(cb.balance, 765_00);
   const vb = (await Z.partyBalances(d, me, biz, "vendor"))[0];
   assert.equal(vb.balance, 1500_00);
@@ -53,14 +55,18 @@ test("business module: purchase, sale, payments, stock, balances, aging, profit,
   // vendor payment, aging and profit
   await Z.addPayment(d, me, biz, { kind: "vendor", partyId: vendor.id, date: "2026-11-15", amount: 1500_00, accountId: cash });
   assert.equal((await Z.partyBalances(d, me, biz, "vendor"))[0].balance, 0);
-  const ag = await Z.aging(d, me, biz, "customer", "2026-12-20");
-  assert.equal(ag[0].d31, 765_00, "40 days old");
+  const ag = (await Z.aging(d, me, biz, "customer", "2026-12-20")).find((p) => p.name === "BILAL")!;
+  assert.equal(ag.d31, 765_00, "40 days old");
+  // a payment "on account" settles the oldest invoice: the invoice balance agrees with what the customer owes
+  await Z.addPayment(d, me, biz, { kind: "customer", partyId: cust.id, date: "2026-11-20", amount: 265_00, accountId: cash });
+  const s1 = (await Z.docs(d, me, biz, "sale")).find((x) => x.number === "S-000001")!;
+  assert.equal(s1.total - s1.paid, 500_00);
   const pr = await Z.productProfit(d, me, biz, B.ALL);
   assert.deepEqual([pr[0].qty, pr[0].sales, pr[0].cost, pr[0].profit], [5, 1500_00, 1250_00, 250_00]);
 
   // deleting the sale takes its entry out of the books; the 500 paid stays as money on the customer's account
   await Z.deleteDoc(d, me, biz, saleId);
-  assert.equal((await Z.partyBalances(d, me, biz, "customer"))[0].balance, -500_00);
+  assert.equal((await Z.partyBalances(d, me, biz, "customer")).find((p) => p.name === "BILAL")!.balance, -765_00);
   await assert.rejects(() => Z.deleteProduct(d, me, biz, rice.id), /on invoices/);
   await assert.rejects(() => Z.deleteParty(d, me, biz, vendor.id), /invoices or payments/);
   // someone else can't touch it

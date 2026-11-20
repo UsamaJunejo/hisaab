@@ -73,6 +73,7 @@ export async function createBusiness(d: Db, owner: number, p: ProfileInput) {
       [owner, name, opt(p.address), opt(p.phone), opt(p.email), opt(p.fax), opt(p.tax_no), opt(p.website), opt(p.country), customers, vendors, walkin, sales, purchases],
     );
     await x.q("INSERT INTO biz_warehouses (business_id, name) VALUES ($1, 'MAIN STORE')", [r.id]);
+    await x.q("INSERT INTO biz_parties (business_id, kind, name, account_id) VALUES ($1, 'customer', 'WALK IN CUSTOMER', $2)", [r.id, walkin]);
     return r.id;
   });
 }
@@ -166,6 +167,8 @@ export async function deleteParty(d: Db, owner: number, biz: number, id: number)
   await getBusiness(d, owner, biz);
   const [p] = await d.q<Party>("SELECT * FROM biz_parties WHERE id = $1 AND business_id = $2", [id, biz]);
   if (!p) return;
+  const b = await getBusiness(d, owner, biz);
+  if (p.account_id === b.walkin_account_id) throw new Error("WALK IN CUSTOMER can't be deleted");
   const [used] = await d.q("SELECT 1 FROM biz_docs WHERE party_id = $1 UNION ALL SELECT 1 FROM biz_payments WHERE party_id = $1 LIMIT 1", [id]);
   if (used) throw new Error("This one has invoices or payments; delete those first");
   await d.tx(async (x) => {
@@ -250,6 +253,7 @@ export async function createDoc(d: Db, owner: number, biz: number, x: DocInput):
   if (!/^\d{4}-\d{2}-\d{2}$/.test(x.date)) throw new Error("Please Enter Date");
   let party: Party | undefined;
   if (x.partyId) [party] = await d.q<Party>("SELECT * FROM biz_parties WHERE id = $1 AND business_id = $2", [x.partyId, biz]);
+  if (x.kind === "sale" && !party) [party] = await d.q<Party>("SELECT * FROM biz_parties WHERE business_id = $1 AND account_id = $2", [biz, b.walkin_account_id]);
   if (x.kind === "purchase" && !party) throw new Error("Please select the vendor");
   if (party && party.kind !== (x.kind === "sale" ? "customer" : "vendor")) throw new Error("Please select the right customer / vendor");
   let subtotal = 0;
@@ -316,16 +320,30 @@ export async function deleteDoc(d: Db, owner: number, biz: number, id: number) {
 
 export type DocRow = { id: number; kind: DocKind; number: string; party: string | null; party_id: number | null; warehouse: string | null; expense_account: string | null; date: string; subtotal: number; discount: number; tax: number; total: number; paid: number; note: string | null };
 
+/** Invoices and vouchers. "Paid" = payments made against the invoice, plus payments made "on account",
+ *  which settle that customer's / vendor's oldest invoices first (so invoice balances agree with what they owe). */
 export async function docs(d: Db, owner: number, biz: number, kind: DocKind | DocKind[], r: B.Range = B.ALL) {
   await getBusiness(d, owner, biz);
-  return d.q<DocRow>(
+  const all = await d.q<DocRow>(
     `SELECT o.id, o.kind, o.number, p.name AS party, o.party_id, w.name AS warehouse, a.name AS expense_account, to_char(o.date, 'YYYY-MM-DD') AS date,
             o.subtotal::float8 AS subtotal, o.discount::float8 AS discount, o.tax::float8 AS tax, o.total::float8 AS total,
             COALESCE((SELECT SUM(amount) FROM biz_payments y WHERE y.doc_id = o.id), 0)::float8 AS paid, o.note
      FROM biz_docs o LEFT JOIN biz_parties p ON p.id = o.party_id LEFT JOIN biz_warehouses w ON w.id = o.warehouse_id LEFT JOIN accounts a ON a.id = o.expense_account_id
-     WHERE o.business_id = $1 AND o.kind = ANY($2::text[]) AND o.date >= $3::date AND o.date <= $4::date ORDER BY o.date DESC, o.id DESC`,
-    [biz, Array.isArray(kind) ? kind : [kind], r.from ?? "1900-01-01", r.to ?? "2999-12-31"],
+     WHERE o.business_id = $1 ORDER BY o.date, o.id`,
+    [biz],
   );
+  const onAccount = new Map((await d.q<{ party_id: number; amount: number }>(
+    "SELECT party_id, SUM(amount)::float8 AS amount FROM biz_payments WHERE business_id = $1 AND doc_id IS NULL GROUP BY party_id", [biz])).map((x) => [x.party_id, x.amount]));
+  for (const o of all) {
+    if (!o.party_id) { if (o.kind === "expense") o.paid = o.total; continue; } // paid straight from cash / bank
+    o.paid = Math.min(o.paid, o.total);
+    const left = onAccount.get(o.party_id) ?? 0;
+    const use = Math.min(left, o.total - o.paid);
+    if (use > 0) { o.paid += use; onAccount.set(o.party_id, left - use); }
+  }
+  const kinds = Array.isArray(kind) ? kind : [kind];
+  const from = r.from ?? "1900-01-01", to = r.to ?? "2999-12-31";
+  return all.filter((o) => kinds.includes(o.kind) && o.date >= from && o.date <= to).reverse();
 }
 
 export async function docLines(d: Db, owner: number, biz: number, docId: number) {
@@ -464,7 +482,7 @@ export async function aging(d: Db, owner: number, biz: number, kind: PartyKind, 
 /** The business dashboard: totals for a period, sales by month and the best-selling products. */
 export async function bizDashboard(d: Db, owner: number, biz: number, r: B.Range) {
   await getBusiness(d, owner, biz);
-  const [s] = await d.q<Record<string, number>>(
+  const [s] = await d.q<{ sales: number; purchases: number; expenses: number; sale_count: number }>(
     `SELECT COALESCE(SUM(total) FILTER (WHERE kind = 'sale'), 0)::float8 AS sales, COALESCE(SUM(total) FILTER (WHERE kind = 'purchase'), 0)::float8 AS purchases,
             COALESCE(SUM(total) FILTER (WHERE kind = 'expense'), 0)::float8 AS expenses, COUNT(*) FILTER (WHERE kind = 'sale')::int AS sale_count
      FROM biz_docs WHERE business_id = $1 AND date >= $2::date AND date <= $3::date`,

@@ -70,8 +70,15 @@ The full feature list is in `docs/` of the FinanceChachu repo (`munshibaba-how-i
   - approve or reject from the bell.
 - **Settings**: language, currency, date format and 24-hour clock, shared accounts, next of kin, projects, move accounts, switch level, budgets, download data (Excel with 3 sheets, or CSV), reset account. (Like MunshiBaba, Group License only appears for group packages, which Hisaab does not sell yet.)
 - **My Account**: profile (picture, name, email, country, cell, date of birth, search visibility, password, M-PIN), Data Space, Billing Info, Invitations, Invoices, Funds.
-- **Plans**: Free 14 days with 25 MB, USD 1 a month, USD 10 a year with 100 MB. When the plan ends or space runs out, Voucher, Reports and Share are locked behind the pay pop-up. Referral reward is 20%.
-- **Support**: Help (per level), FAQs, Report an Issue. The CEO Dashboard is for the admin.
+- **Plans**: Free 14 days with 25 MB, USD 1 a month, USD 10 a year with 100 MB; **Group** USD 3 a month / USD 30 a year for the payer plus 5 people listed in Group License (shown in Settings only on a group package). Prices show in the visitor's own currency too ("about PKR 280"), from their location. When the plan ends or space runs out, Voucher, Reports and Share are locked behind the pay pop-up. Referral reward is 20%.
+- **Support**: Help is a picture slide-show for your level system (real screenshots with numbered marks; remake them with `scripts/help-shots.ts`), the same 29 FAQs, Report an Issue. The CEO Dashboard is for the admin and also lists Contact Us messages and reported issues.
+- **Public website**: Home, About us, Features (Simple Design, Customized system, Multi level system, Easy Transactions, Budget, Reports, each with its own page), Easy Sharing, Pricing and a Contact form.
+- **Business Module** (profile menu → Business Module, like MunshiBaba's Business Management System), for a shop or restaurant:
+  - Business Profile (and Select Business when you have several); Warehouses / Store's, Product Categories, Tax Setup, Discount Setup.
+  - PURCHASE: Product Entry, Direct Purchase, Expense Vouchers, Vendors. SALE: Sale Invoice (named customer or WALK IN CUSTOMER), Customers. PAYMENTS: Vendor Payments, Customers Payments. Printable invoices.
+  - Reports: Stock On Hand, Stock On Hand (With Value), Low Inventory; Purchase Invoice, Product Purchase, Aged Account Payable; Sale Invoice, Product Sale Customer Wise, Receive Money, Aged Account Receivable, Product Wise Profit; Customer / Vendor Ledger, Balance, Payment and Aging; Walk In Customer.
+  - It is joined to your own books: customers are accounts under RECEIVABLES, vendors under PAYABLES, sales go to "<BUSINESS> SALES" (Income) and purchases to "<BUSINESS> PURCHASES" (Expense). So the dashboard, ledgers and every report include the business, and everything still adds up to 0.00.
+  - Not built yet (MunshiBaba has them): the restaurant point of sale (counters, tables, shifts, menu and deals, POS users), buying and selling "by process" (purchase orders, goods receiving, quotations, sale orders, deliveries), production, stock adjustment and movement between warehouses, returns and refunds, branches, tax payments and projects / contracts.
 
 ## Where it differs on purpose (bugs fixed)
 
