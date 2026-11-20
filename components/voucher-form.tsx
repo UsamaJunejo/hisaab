@@ -95,11 +95,11 @@ export function VoucherForm({ init, accounts, level, base, rates }: { init: Vouc
         </div>
       )}
       <div className="grid gap-3 lg:grid-cols-2">
-        <div className="field"><span className="field-label">From</span><AccountPicker name="from" items={accounts} level={level} value={from} onChange={setFrom} showBalance={isPay} invalid={missing.from} /></div>
-        <div className="field"><span className="field-label">To</span><AccountPicker name="to" items={accounts} level={level} value={to} onChange={setTo} showBalance={!isPay} invalid={missing.to} /></div>
+        <div className="field !overflow-visible"><span className="field-label rounded-l-[9px]">From</span><AccountPicker name="from" items={accounts} level={level} value={from} onChange={setFrom} showBalance={isPay} invalid={missing.from} /></div>
+        <div className="field !overflow-visible"><span className="field-label rounded-l-[9px]">To</span><AccountPicker name="to" items={accounts} level={level} value={to} onChange={setTo} showBalance={!isPay} invalid={missing.to} /></div>
         <div className="field"><span className="field-label">Date</span><input type="date" name="date" required value={date} onChange={(e) => setDate(e.target.value)} className="field-input" aria-label="Date" /></div>
-        <div className="field relative">
-          <span className="field-label">Highlight</span>
+        <div className="field relative !overflow-visible">
+          <span className="field-label rounded-l-[9px]">Highlight</span>
           <button type="button" onClick={() => setShowHl(!showHl)} className="flex flex-1 items-center gap-2 px-3" aria-label="Highlight colour">
             <span className="h-6 flex-1 rounded-md ring-1 ring-black/10" style={{ background: hl }} />
           </button>
