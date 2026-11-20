@@ -16,7 +16,7 @@ export function Tile({ t, wide = false }: { t: TileData; wide?: boolean }) {
         </span>
         <span className="min-w-0">
           <span className="block truncate text-[0.8rem] font-semibold tracking-wide text-muted uppercase">{t.name}</span>
-          <span className={`num block truncate text-[1.45rem] font-light ${t.balance < 0 ? "text-red" : "text-ink"}`}>{moneyTile(t.balance)}</span>
+          <span className={`num block truncate text-[1.45rem] font-light text-ink`}>{moneyTile(t.balance)}</span>
         </span>
       </Link>
       {t.edit && <EditTileButton spec={t.edit} name={t.name} />}

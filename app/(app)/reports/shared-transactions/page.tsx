@@ -10,7 +10,7 @@ import { QuerySelect } from "@/components/query-select";
 export const metadata = { title: "Shared Transactions" };
 
 const ST: Record<number, [string, string]> = { 0: ["Pending", "text-blue"], 1: ["Seen", "text-navy-2"], 2: ["Reject", "text-orange"], 3: ["Approved", "text-green"] };
-const SORT: [string, string][] = [["latest", "Latest Entry First"], ["oldest", "Oldest Entry First"], ["az", "Account Name (A - Z)"], ["za", "Account Name (Z - A)"], ["low", "Low Amount First"], ["high", "High Amount First"]];
+const SORT: [string, string][] = [["az", "Account Name (A - Z)"], ["za", "Account Name (Z - A)"], ["low", "Low Balance First"], ["high", "High Balance First"], ["latest", "Latest Entry First"], ["oldest", "Oldest Entry First"]];
 
 /** LIST OF SHARED ENTRIES: every entry in shared ledgers, with its status. */
 export default async function SharedTransactions({ searchParams }: { searchParams: Promise<{ sort?: string }> }) {

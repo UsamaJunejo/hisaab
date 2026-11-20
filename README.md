@@ -9,7 +9,7 @@ Built with Next.js 15, React 19, Tailwind 4 and Postgres. It runs with no setup 
 ```bash
 npm install
 npm run dev      # http://localhost:3000, data kept in ./data/pglite
-npm test         # 6 test files covering the books, reports, sharing and billing
+npm test         # tests for the books, reports, sharing and billing
 ```
 
 The first person to sign up becomes the admin, which gives them access to the CEO Dashboard.
@@ -24,6 +24,8 @@ The first person to sign up becomes the admin, which gives them access to the CE
 3. Deploy. Sign up first, so that you become the admin.
 
 ## What is the same as MunshiBaba
+
+A screen-by-screen check against the live site is in [`docs/audit-vs-munshibaba.md`](docs/audit-vs-munshibaba.md).
 
 The full feature list is in `docs/` of the FinanceChachu repo (`munshibaba-how-it-works.md`). Hisaab follows it screen by screen:
 
@@ -66,8 +68,8 @@ The full feature list is in `docs/` of the FinanceChachu repo (`munshibaba-how-i
   - the receiver accepts;
   - their entries need the owner's approval;
   - approve or reject from the bell.
-- **Settings**: language, currency, date format and 24-hour clock, shared accounts, next of kin, projects, move accounts, switch level, budgets, download data (Excel with 3 sheets, or CSV), group license, reset account.
-- **My Account**: profile (picture, name, email, country, cell, date of birth, search visibility, password, M-PIN), Data Space, Billing Info, Invitations, Invoices, Funds, Business Module.
+- **Settings**: language, currency, date format and 24-hour clock, shared accounts, next of kin, projects, move accounts, switch level, budgets, download data (Excel with 3 sheets, or CSV), reset account. (Like MunshiBaba, Group License only appears for group packages, which Hisaab does not sell yet.)
+- **My Account**: profile (picture, name, email, country, cell, date of birth, search visibility, password, M-PIN), Data Space, Billing Info, Invitations, Invoices, Funds.
 - **Plans**: Free 14 days with 25 MB, USD 1 a month, USD 10 a year with 100 MB. When the plan ends or space runs out, Voucher, Reports and Share are locked behind the pay pop-up. Referral reward is 20%.
 - **Support**: Help (per level), FAQs, Report an Issue. The CEO Dashboard is for the admin.
 

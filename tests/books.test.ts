@@ -56,3 +56,16 @@ test("payables/receivables keep their name and nature", async () => {
   const after = await B.getCategory(d, uid, p.id);
   assert.deepEqual([after.name, after.nature, after.color], ["PAYABLES", "Liabilities", "#123456"]);
 });
+
+test("audit fixes: level chosen at sign-up, MunshiBaba-style invoice number, empty branches left out of statements", async () => {
+  const { tree } = await import("../lib/reports.ts");
+  const d = await openPglite();
+  const uid = await B.createUser(d, { name: "Lev", email: `l${Math.random()}@x.pk`, passwordHash: "x", level: 1 });
+  const [u] = await d.q<{ level: number }>("SELECT level FROM users WHERE id = $1", [uid]);
+  assert.equal(u.level, 1);
+  const [inv] = await d.q<{ id: number; number: string }>("SELECT id, number FROM invoices WHERE user_id = $1", [uid]);
+  assert.equal(inv.number, `HSB-${new Date().getUTCFullYear()}-${String(inv.id).padStart(7, "0")}`);
+  const t = await tree(d, uid, B.ALL);
+  assert.ok(!t.some((c) => c.name === "PAYABLES" || c.name === "RECEIVABLES"), "categories with no accounts are hidden");
+  assert.ok(t.every((c) => c.subs.length > 0 && c.subs.every((s) => s.accounts.length > 0)));
+});

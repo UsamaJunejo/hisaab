@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Briefcase, Gauge, LogOut, UserRound } from "lucide-react";
+import { Gauge, LogOut, UserRound } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 
 export function ProfileMenu({ name, customerNo, photo, isAdmin }: { name: string; customerNo: string; photo: string | null; isAdmin: boolean }) {
@@ -30,7 +30,7 @@ export function ProfileMenu({ name, customerNo, photo, isAdmin }: { name: string
           <div className="grid gap-1 p-2 text-sm">
             <Link href="/portal/profile" className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-page"><UserRound className="h-4 w-4" />My Account</Link>
             {isAdmin && <Link href="/ceo" className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-page"><Gauge className="h-4 w-4" />CEO Dashboard</Link>}
-            <Link href="/portal/business" className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-page"><Briefcase className="h-4 w-4" />Business Module</Link>
+            {/* BUSINESS MODULE: MunshiBaba shows it only to people who own a business there; Hisaab has none. */}
             <form action={logout}><button className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-red hover:bg-red-soft"><LogOut className="h-4 w-4" />Sign out</button></form>
           </div>
         </div>

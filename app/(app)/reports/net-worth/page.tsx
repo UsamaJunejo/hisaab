@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { netWorth, tree } from "@/lib/reports";
-import { fmtDate, money, today } from "@/lib/format";
+import { money, today } from "@/lib/format";
 import { Page } from "@/components/page";
 import { ShowAllBlack } from "@/components/show-all-black";
 
@@ -19,9 +19,8 @@ export default async function NetWorth() {
   return (
     <Page title="Net Worth" level={u.level} rail={{ search: true }}>
       <div className="card mb-4 p-6 text-center">
-        <p className="text-sm text-muted">{fmtDate(today(), u.date_format)}</p>
+        <p className="num text-sm text-muted">{today()}</p>
         <p className={`num text-4xl font-light ${worth < 0 ? "text-red" : ""}`}>{u.currency} {money(worth)}</p>
-        <p className="mt-1 text-xs text-muted">Net worth = what you own (Assets) − what you owe (Liabilities)</p>
       </div>
       <div className="card p-4">
         <div className="mb-2 flex items-center justify-between"><h2 className="text-sm font-bold tracking-wide">DETAILS</h2>{u.level === 1 && <ShowAllBlack />}</div>

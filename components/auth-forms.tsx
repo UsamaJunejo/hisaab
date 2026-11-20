@@ -34,6 +34,13 @@ const PLANS = [
   ["yearly", "PERSONAL YEARLY", "USD 10 / YEAR", "Save 16%: single user, 100 MB data"],
 ] as const;
 
+// "Choose Accounting System" (MunshiBaba asks this when you register; it can be changed later in Settings)
+const LEVELS = [
+  ["1", "1 LEVEL SYSTEM", "Just accounts, all in one place. Ideal for beginners and simple home or shop books."],
+  ["2", "2 LEVEL SYSTEM", "Categories, with accounts inside each one (for example Bank, then each bank account)."],
+  ["3", "3 LEVEL SYSTEM", "Category, then sub-category, then account. The most organised way of keeping books."],
+] as const;
+
 export function SignupForm({ refCode }: { refCode?: string }) {
   const [s, act, pending] = useActionState<FormState, FormData>(signup, {});
   const [country, setCountry] = useState(s.v?.country || "PK");
@@ -61,6 +68,16 @@ export function SignupForm({ refCode }: { refCode?: string }) {
             <input type="radio" name="plan" value={v} defaultChecked={s.v?.plan ? s.v.plan === v : i === 0} className="sr-only" />
             <span className="block text-xs font-bold tracking-wide text-muted">{t}</span>
             <span className="block text-lg font-bold">{p}</span>
+            <span className="block text-xs text-muted">{d}</span>
+          </label>
+        ))}
+      </fieldset>
+      <fieldset className="grid gap-2 sm:grid-cols-3">
+        <legend className="mb-1 text-sm font-semibold">Choose accounting system</legend>
+        {LEVELS.map(([v, t, d]) => (
+          <label key={v} className="cursor-pointer rounded-xl border-2 border-line p-3 has-[:checked]:border-orange has-[:checked]:bg-orange/5">
+            <input type="radio" name="level" value={v} defaultChecked={(s.v?.level || "3") === v} className="sr-only" />
+            <span className="block text-sm font-bold">{t}</span>
             <span className="block text-xs text-muted">{d}</span>
           </label>
         ))}

@@ -2,7 +2,7 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as B from "@/lib/books";
 import { getFilter, pageRange } from "@/lib/filter";
-import { money } from "@/lib/format";
+import { moneyTile } from "@/lib/format";
 import { Page } from "@/components/page";
 import { DashBody, RangeLine } from "@/components/dash";
 import type { TileData } from "@/components/tiles";
@@ -46,7 +46,7 @@ export default async function Dashboard() {
     sum = accs.reduce((s, x) => s + x.balance, 0);
     add = { label: "Add New Account", spec: { level: "account" as const, op: "add" as const, askNature: true, back } };
   }
-  sum += totals.shared;
+  // like MunshiBaba, the badge adds up your own tiles only (not SHARED)
   const bottom: TileData[] = [
     { key: "shared", href: "/dashboard/shared", name: "SHARED", color: "#E12428", icon: "person", balance: totals.shared },
     { key: "pay", href: "/reports/payments", name: "PAYMENTS", color: "#6353A2", icon: "payment", balance: totals.payments },
@@ -55,7 +55,7 @@ export default async function Dashboard() {
   return (
     <Page
       title="Dashboard"
-      badge={money(sum)}
+      badge={moneyTile(sum)}
       level={u.level}
       rail={{ level: "LEVEL 1", search: true, add: { ...add!.spec, label: add!.label }, filter: { back, current: f } }}
     >

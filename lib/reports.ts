@@ -61,13 +61,14 @@ export async function tree(d: Db, viewer: number, r: Range): Promise<TreeCat[]> 
   const accs = await accountBalances(d, viewer, r);
   const cats = await d.q<{ id: number; name: string; nature: Nature }>("SELECT id, name, nature FROM categories WHERE user_id = $1 ORDER BY kind <> 'normal', sort, id", [viewer]);
   const subs = await d.q<{ id: number; name: string; category_id: number }>("SELECT id, name, category_id FROM subcategories WHERE user_id = $1 ORDER BY name", [viewer]);
-  const out: TreeCat[] = cats.map((c) => {
+  const out: TreeCat[] = cats.map((c): TreeCat => {
     const ss = subs.filter((s) => s.category_id === c.id).map((s) => {
       const aa = accs.filter((a) => a.subcategory_id === s.id).map((a) => ({ id: a.id, name: a.name, balance: a.balance }));
       return { id: s.id, name: s.name, accounts: aa, balance: aa.reduce((t, a) => t + a.balance, 0) };
     });
-    return { id: c.id, name: c.name, nature: c.nature, subs: ss, balance: ss.reduce((t, s) => t + s.balance, 0) };
-  });
+    const withAccounts = ss.filter((s) => s.accounts.length > 0); // like MunshiBaba, empty branches are left out
+    return { id: c.id, name: c.name, nature: c.nature, subs: withAccounts, balance: withAccounts.reduce((t, s) => t + s.balance, 0) };
+  }).filter((c) => c.subs.length > 0);
   const shared = await sharedWithMe(d, viewer, r);
   if (shared.length) {
     const owners = [...new Map(shared.map((s) => [s.owner_id, s.owner])).entries()];

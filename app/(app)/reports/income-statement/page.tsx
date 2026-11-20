@@ -19,12 +19,11 @@ export default async function IncomeStatement() {
     <Page title="Income Statement" level={u.level} rail={{ search: true, filter: { back: "/reports/income-statement", current: await getFilter() } }}>
       <ReportHeader u={u} share={{ kind: "income-statement", back: "/reports/income-statement" }} />
       <h2 className="mb-3 text-center text-lg font-semibold tracking-wide">INCOME STATEMENT</h2>
-      <StatementBoxes label={pl.label} amount={`${u.currency} ${money(pl.amount)}`} dates={[["FROM", r.from ? longDate(r.from) : "FIRST ENTRY"], ["TO", longDate(r.to ?? today())]]} />
+      <StatementBoxes label={pl.label} amount={money(pl.amount)} dates={[["FROM", r.from ? longDate(r.from) : "FIRST ENTRY"], ["TO", longDate(r.to ?? today())]]} />
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="card overflow-x-auto p-3"><table className="tbl"><thead><tr><th>Income</th><th className="r">Balance</th></tr></thead><TreeRows cats={t.filter((c) => c.nature === "Income")} /></table></div>
         <div className="card overflow-x-auto p-3"><table className="tbl"><thead><tr><th>Expense</th><th className="r">Balance</th></tr></thead><TreeRows cats={t.filter((c) => c.nature === "Expenses")} /></table></div>
       </div>
-      <p className="mt-3 text-center text-xs text-muted">Income shows as a minus (money came out of the income account into your cash or bank). NET LOSS when expenses are bigger than income.</p>
     </Page>
   );
 }

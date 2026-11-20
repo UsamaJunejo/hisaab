@@ -1,17 +1,19 @@
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { fundsBalance, invoices } from "@/lib/billing";
+import { fmtDate, fmtTime } from "@/lib/format";
 import { Page } from "@/components/page";
 import { PortalNav } from "@/components/portal-nav";
 import { newInvoiceAction, payInvoiceAction } from "@/app/actions/settings";
 
 export const metadata = { title: "Invoices" };
 const usd = (c: number) => `USD ${(c / 100).toFixed(2)} $`;
-const dt = (s: string) => s.slice(0, 16).replace("T", " ");
 
 export default async function Invoices({ searchParams }: { searchParams: Promise<{ plan?: string }> }) {
   const u = await requireUser();
   const d = await db();
+  // like MunshiBaba: "20-04-2022 01:38:46 AM" in your date and time format
+  const dt = (s: string) => `${fmtDate(s, u.date_format)} ${fmtTime(s, u.time24)}`;
   const [list, funds] = await Promise.all([invoices(d, u.id), fundsBalance(d, u.id)]);
   const want = (await searchParams).plan;
   const current = list.find((i) => i.status === "UnPaid") ?? list[0];

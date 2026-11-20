@@ -36,7 +36,8 @@ export function Bars({ data }: { data: Slice[] }) {
   const span = max - min || 1;
   const W = 600, H = 300, pad = 56, top = 14, bottom = 14;
   const y = (v: number) => top + ((max - v) / span) * (H - top - bottom);
-  const bw = Math.min(54, (W - pad - 10) / Math.max(1, items.length) - 12);
+  const slot = (W - pad - 10) / Math.max(1, items.length);
+  const bw = slot * 0.62; // bars share the width evenly, as in MunshiBaba
   const ticks = 6;
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="h-72 w-full" role="img" aria-label="Balances">
@@ -51,7 +52,7 @@ export function Bars({ data }: { data: Slice[] }) {
       })}
       <line x1={pad} x2={W - 4} y1={y(0)} y2={y(0)} stroke="#9aa3b2" />
       {items.map((d, i) => {
-        const x = pad + 10 + i * ((W - pad - 10) / items.length) + 6;
+        const x = pad + 10 + i * slot + (slot - bw) / 2;
         const y0 = y(0), y1 = y(d.value);
         return <rect key={d.name} x={x} width={bw} y={Math.min(y0, y1)} height={Math.max(1, Math.abs(y1 - y0))} fill={d.color} rx="3"><title>{`${d.name}: ${money(d.value)}`}</title></rect>;
       })}

@@ -77,8 +77,8 @@ export default async function AccountLedger({ params, searchParams }: { params: 
         <div className="card overflow-hidden">
           <p className="th-grey px-4 py-2 text-center">Account</p>
           <dl className="grid grid-cols-[6rem_1fr] gap-2 p-3 text-sm">
-            <dt className="font-semibold">Name:</dt><dd>{acc.name}{!acc.mine && <span className="text-muted"> ({acc.owner})</span>}</dd>
-            <dt className="font-semibold">Balance</dt><dd className={`num font-semibold ${L.balance < 0 ? "text-red" : ""}`}>{money(L.balance)}</dd>
+            <dt className="font-semibold">NAME:</dt><dd>{acc.name}{!acc.mine && <span className="text-muted"> ({acc.owner})</span>}</dd>
+            <dt className="font-semibold">BALANCE</dt><dd className={`num font-semibold ${L.balance < 0 ? "text-red" : ""}`}>{money(L.balance)}</dd>
           </dl>
         </div>
         <div className="card overflow-hidden">
@@ -104,8 +104,8 @@ export default async function AccountLedger({ params, searchParams }: { params: 
         <div className="card overflow-hidden">
           <p className="th-grey px-4 py-2 text-center">Date</p>
           <dl className="grid grid-cols-[4rem_1fr] gap-2 p-3 text-sm">
-            <dt className="font-semibold">From</dt><dd>{r.from ? longDate(r.from) : "FIRST ENTRY"}</dd>
-            <dt className="font-semibold">To</dt><dd>{longDate(r.to ?? today())}</dd>
+            <dt className="font-semibold">FROM</dt><dd>{r.from ? longDate(r.from) : "FIRST ENTRY"}</dd>
+            <dt className="font-semibold">TO</dt><dd>{longDate(r.to ?? today())}</dd>
           </dl>
         </div>
       </div>
@@ -119,7 +119,7 @@ export default async function AccountLedger({ params, searchParams }: { params: 
             {L.rows.map((row, i) => (
               <tr key={row.id} data-search={`${row.note ?? ""} ${row.other} ${row.amount / 100}`} style={{ background: row.highlight ?? undefined }}>
                 <td className="c">{i + 1}.</td>
-                <td className="c num whitespace-nowrap">{fmtDate(row.date, u.date_format)}</td>
+                <td className="c num whitespace-nowrap">{row.date.slice(0, 10)}</td>
                 <td className="min-w-56">{narration(row)}</td>
                 <td className="r num">{row.out ? money(row.out) : ""}</td>
                 <td className="r num">{row.in ? money(row.in) : ""}</td>
@@ -155,7 +155,7 @@ export default async function AccountLedger({ params, searchParams }: { params: 
               {L.pending.map((row, i) => (
                 <tr key={row.id}>
                   <td>{i + 1}.</td>
-                  <td className="num whitespace-nowrap">{fmtDate(row.date, u.date_format)}</td>
+                  <td className="num whitespace-nowrap">{row.date.slice(0, 10)}</td>
                   <td>{narration(row)}</td>
                   <td className="r num">{row.out ? money(row.out) : ""}</td>
                   <td className="r num">{row.in ? money(row.in) : ""}</td>

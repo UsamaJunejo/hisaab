@@ -22,7 +22,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
   const total = subs.reduce((s, x) => s + x.balance, 0);
   const add = { label: `Add ${cat.name}`, spec: { level: "sub" as const, op: "add" as const, parent: id, back } };
   return (
-    <Page title={<>{cat.name} <span className="num font-light">{moneyTile(total)}</span></>} level={u.level}
+    <Page title={cat.name} badge={moneyTile(total)} level={u.level}
       rail={{ level: "LEVEL 2", search: true, add: { ...add.spec, label: "Add New Sub Category" }, filter: { back, current: f } }}>
       <RangeLine from={from} to={to} f={u.date_format} />
       <DashBody add={add} tiles={subs.map((s) => ({

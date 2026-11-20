@@ -4,7 +4,7 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as B from "@/lib/books";
 import { ratesToday } from "@/lib/fx";
-import { addMonths, fmtDate, money, today } from "@/lib/format";
+import { addMonths, dotDate, money, today } from "@/lib/format";
 import { Page } from "@/components/page";
 import { VoucherForm, type VoucherInit } from "@/components/voucher-form";
 import { ConfirmForm } from "@/components/confirm-form";
@@ -43,9 +43,9 @@ export default async function Voucher({ searchParams }: { searchParams: Promise<
             <tbody>
               {history.length === 0 && <tr><td colSpan={8} className="py-6 text-center text-muted">No {vtype === "P" ? "payments" : "receipts"} in the last month.</td></tr>}
               {history.map((e, i) => (
-                <tr key={e.id} style={{ background: e.highlight ?? undefined }}>
+                <tr key={e.id}>
                   <td>{i + 1}.</td>
-                  <td className="num whitespace-nowrap">{fmtDate(e.date, u.date_format)}</td>
+                  <td className="num whitespace-nowrap">{dotDate(e.date)}</td>
                   <td>{e.from_name}</td>
                   <td>{e.to_name}</td>
                   <td className="r num">{money(e.amount)}</td>

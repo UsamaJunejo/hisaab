@@ -122,7 +122,7 @@ export function VoucherForm({ init, accounts, level, base, rates }: { init: Vouc
           </ul>
         </div>
         <span className="flex-1" />
-        {init.id ? <Link href={`/voucher/print/${init.id}`} target="_blank" className="btn btn-blue"><Printer className="h-4 w-4" />Print</Link> : <span className="btn btn-ghost pointer-events-none opacity-50"><Printer className="h-4 w-4" />Print</span>}
+        {init.id ? <Link href={`/voucher/print/${init.id}`} target="_blank" className="btn btn-blue"><Printer className="h-4 w-4" />Print</Link> : null}
         {init.id ? <Link href={`/voucher?t=${init.vtype}`} className="btn btn-red"><RotateCcw className="h-4 w-4" />Reset</Link> : <button type="button" onClick={reset} className="btn btn-red"><RotateCcw className="h-4 w-4" />Reset</button>}
         <button className="btn btn-green min-w-28" disabled={pending}><Save className="h-4 w-4" />{pending ? "Saving…" : init.id ? "Update" : "Save"}</button>
       </div>

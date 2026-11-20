@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const ITEMS: [string, string][] = [
-  ["/portal/profile", "Profile"], ["/portal/data", "Data Space"], ["/portal/billing", "Billing Info"], ["/portal/invitations", "Invitations"],
-  ["/portal/invoices", "Invoices"], ["/portal/funds", "Funds"], ["/portal/business", "Business Module"],
+  ["/dashboard", "DASHBOARD"], ["/portal/profile", "PROFILE"], ["/portal/data", "DATA SPACE"], ["/portal/billing", "BILLING INFO"],
+  ["/portal/invitations", "INVITATIONS"], ["/portal/invoices", "INVOICES"], ["/portal/funds", "FUNDS"],
 ];
 
 export function PortalNav() {

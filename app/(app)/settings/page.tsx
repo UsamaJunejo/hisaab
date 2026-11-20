@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeftRight, CalendarDays, ChevronRight, Coins, Download, Gauge, Languages, PieChart, RotateCcw, Share2, Users, UsersRound, FolderKanban } from "lucide-react";
+import { ArrowLeftRight, CalendarDays, ChevronRight, Coins, Download, Gauge, Languages, PieChart, RotateCcw, Share2, UsersRound, FolderKanban } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { Page } from "@/components/page";
 import { COUNTRIES } from "@/lib/countries";
@@ -36,18 +36,18 @@ export default async function Settings() {
             </select>
             <p id="st-cur-h" className="mt-1 text-xs text-muted">Shown next to every amount. Amounts already entered are not converted.</p>
           </Row>
-          <Row icon={<CalendarDays className="h-5 w-5 text-red" />} title="Date Format" value={`${u.date_format}, ${u.time24 ? "24" : "12"} hours`}>
+          <Row icon={<CalendarDays className="h-5 w-5 text-red" />} title="Date Format">
             <label className="mb-3 flex items-center gap-2 text-sm"><input type="checkbox" form="settings" name="time24" defaultChecked={u.time24} /> Use 24 Hours Format (otherwise 1:00 PM)</label>
             <label className="mb-1 block text-sm font-semibold" htmlFor="st-df">Select Date Format</label>
             <select id="st-df" form="settings" name="date_format" defaultValue={u.date_format} className="input">{DATE_FORMATS.map((f) => <option key={f}>{f}</option>)}</select>
           </Row>
           <Row icon={<Share2 className="h-5 w-5 text-green" />} title="Shared Accounts" href="/share" />
-          <Row icon={<UsersRound className="h-5 w-5 text-red" />} title="Next to Kin" href="/next-of-kin" value={u.nok_name ?? "Not set"} />
+          <Row icon={<UsersRound className="h-5 w-5 text-red" />} title="Next to Kin" href="/next-of-kin" />
           <Row icon={<FolderKanban className="h-5 w-5 text-orange" />} title="Add Projects" href="/projects" />
         </div>
         <div className="space-y-3">
           <Row icon={<ArrowLeftRight className="h-5 w-5 text-red" />} title="Move Accounts" href="/move-account" />
-          <Row icon={<Gauge className="h-5 w-5 text-green" />} title="Switch Accounting Level" value={`${u.level} LEVEL SYSTEM`}>
+          <Row icon={<Gauge className="h-5 w-5 text-green" />} title="Switch Accounting Level">
             <form action={switchLevelAction} className="space-y-3">
               <div className="grid gap-2 sm:grid-cols-3">
                 {[1, 2, 3].map((l) => (
@@ -72,7 +72,8 @@ export default async function Settings() {
               <button className="btn btn-blue"><Download className="h-4 w-4" />Download Data</button>
             </form>
           </Row>
-          <Row icon={<Users className="h-5 w-5 text-blue" />} title="Group License" href="/group-license" />
+          {/* GROUP LICENSE: MunshiBaba shows it only on its group packages, which Hisaab does not sell. */}
+
           <Row icon={<RotateCcw className="h-5 w-5 text-red" />} title="Reset Account">
             <form action={resetAccountAction} className="space-y-3">
               <p className="rounded-lg bg-red-soft p-3 text-sm font-semibold text-red">PLEASE DOWNLOAD DATA BEFORE DELETING ALL YOUR TRANSACTIONS AND ACCOUNTS</p>

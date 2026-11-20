@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { FileSpreadsheet, FileText, Printer } from "lucide-react";
-import { longDate, today } from "@/lib/format";
+import { printDate, today } from "@/lib/format";
 import { ShareStatement, PageSize } from "@/components/ledger-bits";
 import { PrintButton } from "@/components/print-button";
 
@@ -21,7 +21,7 @@ export function ReportHeader({ u, excel, share, size, extra }: { u: { name: stri
           <ShareStatement {...share} />
           <PrintButton label="Print" icon={<Printer className="h-5 w-5" />} />
         </div>
-        <p>Print Date: <b>{longDate(today())}</b></p>
+        <p>Print Date: <b>{printDate(today())}</b></p>
         <p>Currency: <b>{u.currency}</b></p>
         {extra}
         {size && <div className="no-print"><PageSize value={size} /></div>}

@@ -37,6 +37,16 @@ export function longDate(iso: string): string {
   return `${d} ${MON[Number(m) - 1]} ${y}`;
 }
 
+const Mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+/** "2026-11-20" -> "20 Nov 2026" (the "Print Date" on statements, as MunshiBaba writes it). */
+export function printDate(iso: string): string {
+  const [y, m, d] = iso.slice(0, 10).split("-");
+  return `${d} ${Mon[Number(m) - 1]} ${y}`;
+}
+
+/** "2026-11-06" -> "2026.11.06" (voucher history, as MunshiBaba writes it). */
+export const dotDate = (iso: string) => iso.slice(0, 10).replaceAll("-", ".");
+
 /** "2026-11-19T14:05:00" -> "02:05:00 PM" or "14:05:00". */
 export function fmtTime(ts: string | Date, time24: boolean): string {
   const t = typeof ts === "string" ? new Date(ts) : ts;

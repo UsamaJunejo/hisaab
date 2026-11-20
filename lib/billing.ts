@@ -54,6 +54,11 @@ export async function transferFunds(d: Db, userId: number, cents: number, to: st
   });
 }
 
+/** Invoice numbers look like MunshiBaba's ("PAK-2022-0000006"): HSB-<year>-<7-digit invoice id>. */
+export async function numberInvoice(d: Db, id: number) {
+  await d.q("UPDATE invoices SET number = 'HSB-' || to_char(created_at, 'YYYY') || '-' || lpad(id::text, 7, '0') WHERE id = $1", [id]);
+}
+
 /** Make an invoice for a plan (if there isn't an unpaid one already). */
 export async function invoiceFor(d: Db, userId: number, plan: keyof typeof PLANS) {
   const p = PLANS[plan];
@@ -61,9 +66,10 @@ export async function invoiceFor(d: Db, userId: number, plan: keyof typeof PLANS
   if (open) return open.id;
   const [r] = await d.q<{ id: number }>(
     `INSERT INTO invoices (user_id, number, package, amount_cents, due_at, status)
-     VALUES ($1::int, 'HSB-' || to_char(now(), 'YYYY') || '-' || lpad($1::int::text, 7, '0') || '-' || floor(random() * 100000)::int, $2, $3, now(), 'UnPaid') RETURNING id`,
+     VALUES ($1::int, 'new-' || gen_random_uuid(), $2, $3, now(), 'UnPaid') RETURNING id`,
     [userId, p.name, p.cents],
   );
+  await numberInvoice(d, r.id);
   return r.id;
 }
 

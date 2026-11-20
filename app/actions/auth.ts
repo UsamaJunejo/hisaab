@@ -12,7 +12,7 @@ const s = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
 export async function signup(_: FormState, f: FormData): Promise<FormState> {
   const r = await signupInner(f);
-  return r.error ? { ...r, v: { name: s(f, "name"), email: s(f, "email"), phone: s(f, "phone"), country: s(f, "country"), plan: s(f, "plan") }, n: Date.now() } : r;
+  return r.error ? { ...r, v: { name: s(f, "name"), email: s(f, "email"), phone: s(f, "phone"), country: s(f, "country"), plan: s(f, "plan"), level: s(f, "level") }, n: Date.now() } : r;
 }
 
 async function signupInner(f: FormData): Promise<FormState> {
@@ -25,13 +25,15 @@ async function signupInner(f: FormData): Promise<FormState> {
   if (p1.length < 6) return { error: "Please Enter Password Comprising Of At Least 6 (Six) Characters." };
   if (p1 !== p2) return { error: "Passwords do not match." };
   if (!["free", "monthly", "yearly"].includes(plan)) return { error: "Please Select Your Package." };
+  const level = Number(s(f, "level"));
+  if (![1, 2, 3].includes(level)) return { error: "Please choose your accounting system (1, 2 or 3 level)." };
   if (f.get("accept") !== "on") return { error: "Please accept the Terms of Use." };
   let id: number;
   try {
     const d = await db();
     const ref = s(f, "ref");
     const [r] = ref ? await d.q<{ id: number }>("SELECT id FROM users WHERE customer_no = $1", [ref]) : [];
-    id = await createUser(d, { name, email, phone, country, passwordHash: await bcrypt.hash(p1, 10), plan, referredBy: r?.id ?? null });
+    id = await createUser(d, { name, email, phone, country, passwordHash: await bcrypt.hash(p1, 10), plan, referredBy: r?.id ?? null, level: level as 1 | 2 | 3 });
     await d.q("UPDATE invitations SET status = 'accepted' WHERE lower(email) = lower($1) AND status = 'pending'", [email]);
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Issues while registration" };

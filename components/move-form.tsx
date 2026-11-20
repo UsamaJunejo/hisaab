@@ -25,7 +25,6 @@ export function MoveForm({ cats, subs, accs }: { cats: { id: number; name: strin
         <label className="field"><span className="field-label">Category</span>{catSel(c2, setC2)}</label>
         <label className="field"><span className="field-label">Sub-Category</span>
           <select name="sub" defaultValue="" className="field-input"><option value="">Select</option>{subs.filter((s) => s.category_id === c2).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></label>
-        <p className="text-xs text-muted">The account moves with all its transactions. Its balance now counts in the new category&apos;s reports.</p>
         <div className="text-right"><button className="btn btn-green">Move</button></div>
       </div>
     </form>

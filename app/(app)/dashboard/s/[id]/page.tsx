@@ -22,7 +22,7 @@ export default async function SubPage({ params }: { params: Promise<{ id: string
   const total = accs.reduce((s, x) => s + x.balance, 0);
   const add = { label: "Add New Account", spec: { level: "account" as const, op: "add" as const, parent: id, back } };
   return (
-    <Page title={<>{sub.name} <span className="num font-light">{moneyTile(total)}</span></>} level={u.level}
+    <Page title={sub.name} badge={moneyTile(total)} level={u.level}
       rail={{ level: u.level === 3 ? "LEVEL 3" : "LEVEL 2", search: true, add: { ...add.spec, label: add.label }, filter: { back, current: f } }}>
       <RangeLine from={from} to={to} f={u.date_format} />
       <DashBody add={add} tiles={accs.map((a) => ({
